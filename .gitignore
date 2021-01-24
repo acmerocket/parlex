@@ -1,3 +1,6 @@
+# Ignore data dir, don't wan't to upload datasets
+data/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
