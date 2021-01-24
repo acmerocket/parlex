@@ -1,6 +1,9 @@
 # Ignore data dir, don't wan't to upload datasets
 data/
 
+# F*ckin Apple
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

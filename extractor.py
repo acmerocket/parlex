@@ -24,27 +24,6 @@ class ParlerMessage:
     self.username = user
     self.text = text
     
-
-def extract_all(archive_name):
-    zf = zipfile.ZipFile(archive_name)
-
-    i = 0
-
-    for info in zf.infolist():
-        try:    
-            data = zf.read(info.filename)
-            process_file(data)
-            i = i+1
-        except KeyError:
-            logging.error("Did not find %s in zip file" % info.filename)
-
-    print("Extracted %s records", i)
-
-
-def process_file(data):
-    attrs = parse_message(data)
-    print(attrs)
-
     
 ATTR_MAP = {
     "title": "meta[property='og:title']",
@@ -93,23 +72,6 @@ def parse_message(data):
 
     return attrs
         
-
-## OLD version
-def parse_content(data):
-    dom = HTMLParser(data)
-
-    title = dom.css_first("meta[property='og:title']").attributes["content"]
-    desc = dom.css_first("meta[name='description']").attributes["content"]
-    mid = dom.css_first("meta[property='og:url']").attributes["content"] 
-    uid = dom.css_first("meta[property='og:image']").attributes["content"] 
-
-    user = dom.css_first(".author--username").text()
-    text = dom.css_first("div.card--body > p").text(strip=True)
-
-    message = ParlerMessage(mid, uid, title, desc, user, text)
-    print(message.__dict__)
-
-
 def extract_meta_attrs(dom):
     attrs = {}
 
@@ -125,12 +87,36 @@ def extract_meta_attrs(dom):
 
     return attrs
 
+
+def process_file(data):
+    attrs = parse_message(data)
+    print(attrs)
+
+
+def extract_all(archive_name):
+    zf = zipfile.ZipFile(archive_name)
+
+    i = 0
+
+    for info in zf.infolist():
+        try:    
+            data = zf.read(info.filename)
+            process_file(data)
+            i = i+1
+        except KeyError:
+            logging.error("Did not find %s in zip file" % info.filename)
+
+    print("Extracted %s records", i)
+
 def main():
-    extract_all(sys.argv[1])
-
-    ## TODO: Move to tests
-    #process_file(open("pdb/untitled 4.html", "r").read())
-
+    if len(sys.argv) == 0:
+        process_file(open("pdb/untitled 4.html", "r").read()) ## simple test, move to test
+    else:
+        for filename in sys.argv:
+            if filename.endswith(".zip"):
+                extract_all(filename)
+            else:
+                process_file(open(filename, "r").read())
 
 
 if __name__ == '__main__':
