@@ -23,10 +23,10 @@ def sample_archive(archive_name, count):
             i+=1
             if i >= count:
                 break
-            zf.extract(info.filename, "data/samples")
+            zf.extract(info.filename, "test/resources")
 
 def main():
-    sample_archive(sys.argv[1], 10)
+    sample_archive(sys.argv[1], 100)
 
 
 if __name__ == '__main__':
