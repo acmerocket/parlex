@@ -12,18 +12,7 @@ from selectolax.parser import HTMLParser
 ## meta tags to ignore
 META_IGNORE = {"viewport", "og:type", "og:site_name", "twitter:card", "twitter:title", 
         "twitter:description", "twitter:site", "twitter:image", "description",
-        "theme-color"}
-
-
-class ParlerMessage:
-  def __init__(self, mid, uid, title, desc, user, text):
-    self.title = title
-    self.description = desc
-    self.messageid = mid
-    self.userid = uid
-    self.username = user
-    self.text = text
-    
+        "theme-color"}    
     
 ATTR_MAP = {
     "title": "meta[property='og:title']",

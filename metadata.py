@@ -7,8 +7,10 @@
 
 import sys
 import logging
+from typing import Text
 import zipfile
 import pprint
+import os
 
 from selectolax.parser import HTMLParser
 
@@ -17,7 +19,17 @@ META_IGNORE = {"viewport", "og:type", "og:site_name", "twitter:card", "twitter:t
         "twitter:description", "twitter:site", "twitter:image", "description",
         "theme-color"}
 
-ALL_TAGS = {}
+#ALL_TAGS = {}
+
+def og_metadata(dom):
+    attrs = {}
+
+    for tag in dom.tags("meta"):
+        if "property" in tag.attributes:
+            name = tag.attributes["property"]
+            attrs[name] = tag.attributes["content"]
+
+    return attrs
 
 def sample_archive(archive_name, count):
 
@@ -35,50 +47,56 @@ def sample_archive(archive_name, count):
     print("processed %s records", i)
 
 
-def scrape_tags(data):
+# scrape_tags - low-level data scraping indented for verification and coverage. 
+# Desired metadata is captured "structurally" with CSS selectors, while this captures 
+# all data to verify is anything is missing.
+def scrape_tags(dom):
     attrs = {}
-
-    dom = HTMLParser(data)
-    for node in dom.css("meta"):
-        name = nodename(node)
+    for node in dom.css("*"):
         value = nodevalue(node)
+        if value is not None:
+            name = nodename(node)
+            #print(name, " -> ", value)
 
-        if name is not None and value is not None and len(value) > 0:
-            print(name, " ==> ", value)
-            #attrs[name] = value
-        else:
-            print("???", node.attributes, node.text(strip=True))
-
+            # check for duplicate key
+            if name not in attrs:
+                attrs[name] = [value]
+            else:
+                attrs[name].append(value)
     return attrs
-        
-def nodevalue(node):
-    text = value = node.text(deep=False, strip=True)
-    content = None
-    if "content" in node.attributes:
-        content = node.attributes["content"]
-    if "href" in node.attributes and content is None:
-        content = node.attributes["href"]
-    if len(text) > 0 and content is not None:
-        #print("WARNING - mismatch content and text", content, text)
-        return text
-    elif content is not None:
-        return content
-    else:
-        return text
 
-def nodename(node):
-    if "id" in node.attributes:
-        return node.attributes["id"]
-    if "name" in node.attributes:
-        return node.attributes["name"]
-    elif "property" in node.attributes:
-        return node.attributes["property"]
+
+# nodevalue - determine is there is a worthwile value in the node (text or attribute) and return it, or None.  
+def nodevalue(node):
+    text = node.text(deep=False, strip=True)
+    if text is not None and len(text) > 0:
+        return text
     else:
-        return node.attributes.get("class", None)
-        #if node.parent is None:
-        #    return node.attributes.get("class", "")
-        #else:
-        #    return nodename(node.parent) + "." + node.attributes.get("class", "")
+        # check a bunch of attributes
+        for attr in ["content", "href", "src"]:
+            if attr in node.attributes:
+                return node.attributes[attr]
+    
+    # some data splunking
+    if (len(node.attributes) > 0):
+        logging.debug("No value found for:", node.attributes)
+    return None
+
+# nodename - derive a name for the node, based on metadata or structure in DOM.
+def nodename(node):
+    # check a bunch of attributes
+    for attr in ["id", "name", "property"]:
+        if attr in node.attributes:
+            return node.attributes[attr]
+    
+    # no known name, construct from class?
+    name = ""
+    if "class" in node.attributes:
+        name += node.attributes.get("class")
+    if "class" in node.parent.attributes:
+        name = node.parent.attributes.get("class") + name
+    return name
+
 
 def extract_meta_attrs(dom):
     attrs = {}
@@ -95,14 +113,52 @@ def extract_meta_attrs(dom):
 
     return attrs
 
+COMMENT_MAPPING = {
+    "body": ".card--body",
+    "name": ".author--name",
+    "username": ".author--username",
+    "replies": ".ca--item--wrapper img[alt='Replies'] + .ca--item--count",
+    "echoes": ".ca--item--wrapper img[alt='Post Echoes'] + .ca--item--count",
+    "upvotes": ".ca--item--wrapper img[alt='Post Upvotes'] + .ca--item--count"
+
+    #"badge": ".ch--avatar--badge--wrapper",
+    #"avatar": ".ch--avatar--wrapper",
+    #"profile": ".pf--jccard-meta--row"
+}
+# Reurns an array of 
+def extract_comments(dom):
+    data = {}
+    comments = []
+
+    for comment_node in dom.css("div.reply--card--wrapper"):
+        comment = {}
+        for key, select in COMMENT_MAPPING.items():
+            for node in comment_node.css(select):
+                value = node.text(strip=True)
+                #print("--", key, value)
+                comment[key] = value
+
+        comments.append(comment)
+
+    return comments
+
 def process_file(data):
+    # build a dom
+    dom = HTMLParser(data)
+
+    comments = extract_comments(dom)
+
     # Process all the tags in the file to
-    tags = scrape_tags(data)
+    #og_tags = og_metadata(dom) 
+    #other_metadata = extract_meta_attrs(dom)
+    
+    tags = scrape_tags(dom)
 
-    #pp = pprint.PrettyPrinter(indent=4)
-    #pp.pprint(tags)
+    pp = pprint.PrettyPrinter(indent=4, width=160)
+    pp.pprint(comments)
+    #pp.pprint(other_metadata)
 
-    #ALL_TAGS.update(tags)
+
 
 def extract_all(archive_name):
     zf = zipfile.ZipFile(archive_name)
@@ -126,6 +182,10 @@ def main():
         for filename in sys.argv:
             if filename.endswith(".zip"):
                 extract_all(filename)
+            elif os.path.isdir(filename):
+                # process everything in the dir
+                for file in os.listdir(filename):
+                    process_file(open(file, "r").read())
             else:
                 process_file(open(filename, "r").read())
 

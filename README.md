@@ -48,6 +48,10 @@ https://github.com/TheBlindEye/ParlerMetadata
 
 ### Parsing Notes
 
+General idea is a list of CSS slection statments (see `extractor.py:ATTR_MAP`)), tested against each document in the archive, to create a record of interesting data in the HTML doc.
+
+Currently dumping raw py dicts, need to clean that up into valid JSON.
+
 HTML -> json/tagged data -> DB (indexed doc db, text search, elastic?)
 
 
@@ -90,6 +94,81 @@ First pass, pull...
 * userid
 * username
 * text
+
+### Comments
+
+'at' ??
+
+        <div class="reply--card--wrapper">
+        <div class="card card--comment-container w--100">
+        <div class="card--header p--flex pf--row">
+            <div class="ch--col ch--avatar-col">
+                <div class="ch--avatar--wrapper">
+
+.reply--card--wrapper .card--body
+.reply--card--wrapper .card-meta--rowauthor--name
+.reply--card--wrapper .card-meta--rowauthor--username
+.reply--card--wrapper .ch--avatar--badge--wrapper
+.reply--card--wrapper .ch--avatar--wrapper
+.reply--card--wrapper .pf--jccard-meta--row
+
+
+    <div class="reply--card--wrapper">
+      <div class="card card--comment-container w--100">
+        <div class="card--header p--flex pf--row">
+            <div class="ch--col ch--avatar-col">
+                <div class="ch--avatar--wrapper">
+                    <img src="https://company-media.parler.com/par-default-profile-picture.jpg" alt="Comment Author Profile Pic">
+                </div>
+                
+            </div>
+            <div class="ch--col ch--meta-col p--flex pf--col pf--jc">
+                
+                <a href="/profile/Alltemped/posts" class="card-meta--row">
+                
+                    <span class="author--name">Alltemped</span>
+                    <span class="separator">·</span>
+                    <span class="author--username">@Alltemped</span>
+                
+                </a>
+                
+                <span class="card-meta--row">
+                    <span class="post--timestamp">3 days ago</span>
+                </span>
+            </div>
+            <div class="ch--col ch--menu-col">
+                <div class="ch--more-actions--wrapper"></div>
+            </div>
+        </div>
+
+        <div class="card--body">
+            <p>I say we T bag Kamala I here she likes it.</p>
+            
+        </div>
+
+        <div class="card--footer">
+            <div class="comment--actions p--flex pf--ac pf--jsb">
+                <div class="comment--actions--row ca--main-row p--flex pf--ac pf--jsb">
+                    <div class="ca--item--wrapper">
+                        <img src="/512ae92f/images/icons/comment.svg" alt="Replies">
+                        <span class="ca--item--count">0</span>
+                    </div>
+                    <div class="ca--item--wrapper">
+                        <img src="/512ae92f/images/icons/upvote.svg" class="downvotes" alt="Post Echoes">
+                        <span class="ca--item--count">0</span>
+                    </div>
+                    <div class="ca--item--wrapper">
+                        <img src="/512ae92f/images/icons/upvote.svg" alt="Post Upvotes">
+                        <span class="ca--item--count">0</span>
+                    </div>
+                </div>
+                <div class="comment--actions--row ca--alt-row p--flex pf--ac pf--jsb"></div>
+            </div>
+        </div>
+    </div>
+
+                                    </div>
+
 
 ### Parler minilinks?
 
