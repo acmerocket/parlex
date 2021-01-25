@@ -39,13 +39,13 @@ def scrape_tags(data):
     attrs = {}
 
     dom = HTMLParser(data)
-    for node in dom.css("*"):
+    for node in dom.css("meta"):
         name = nodename(node)
         value = nodevalue(node)
 
         if name is not None and value is not None and len(value) > 0:
-            #print(name, " ==> ", value)
-            attrs[name] = value
+            print(name, " ==> ", value)
+            #attrs[name] = value
         else:
             print("???", node.attributes, node.text(strip=True))
 
@@ -74,7 +74,7 @@ def nodename(node):
     elif "property" in node.attributes:
         return node.attributes["property"]
     else:
-        return node.attributes.get("class", "")
+        return node.attributes.get("class", None)
         #if node.parent is None:
         #    return node.attributes.get("class", "")
         #else:
@@ -99,8 +99,8 @@ def process_file(data):
     # Process all the tags in the file to
     tags = scrape_tags(data)
 
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(tags)
+    #pp = pprint.PrettyPrinter(indent=4)
+    #pp.pprint(tags)
 
     #ALL_TAGS.update(tags)
 
