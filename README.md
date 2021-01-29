@@ -21,30 +21,49 @@ The system will (eventually) consist of:
 * extractor: Parse an archive into a well-defined structure.
 * loader: Load extracted data into a data system: Export as CSV, SQL, JSON.
 * launcher: Launch a cloud/container instance with DB, load scripts and prepared queries.
-
-
+ 
 ## Working notes
 
 * researched tooling and existing libraries, found a python parsing lib and a docker impl.
 * installing tools and updates for docker tools, to try...
 
 
-### Grabbing (and other projects)
+Set up S3 access, as per https://ddosecrets.com/wiki/Parler
+
+    ssh -i ~/.ssh/parler.pem ubuntu@ec2-3-95-203-75.compute-1.amazonaws.com
+    
+And mounted S3 as per https://cloudkul.com/blog/mounting-s3-bucket-linux-ec2-instance/
+
+    sudo apt-get update
+    sudo apt-get install automake autotools-dev fuse g++ git libcurl4-gnutls-dev libfuse-dev libssl-dev libxml2-dev make pkg-config
+    git clone https://github.com/s3fs-fuse/s3fs-fuse.git
+    cd s3fs-fuse
+    ./autogen.sh
+    ./configure --prefix=/usr --with-openssl
+    make
+    sudo make install
+    
+    mkdir /mnt/ddosecrets-parler
+    s3fs ddosecrets-parler -o requester_pays -o use_cache=/tmp -o allow_other -o uid=1001 -o mp_umask=002 -o multireq_max=5 /mnt/ddosecrets-parler
 
 
-https://github.com/d0nk/parler-tricks
-https://github.com/ArchiveTeam/parler-grab
-https://github.com/radicalarchivist/propublica-parler
+Interesting... https://colab.research.google.com/github/sbooeshaghi/parlertrick/blob/main/parler.ipynb
+
+
+### Grabbing (and other data)
+
+* https://github.com/d0nk/parler-tricks
+* https://github.com/ArchiveTeam/parler-grab
+* https://github.com/radicalarchivist/propublica-parler
 
 ### Data Processing Tools
 
-https://github.com/d-sanderson/yall-data-hasura
-
-https://github.com/ozywog/parler-data-tools
-
-https://github.com/TheBlindEye/ParlerMetadata
-
-?? https://github.com/sbooeshaghi/parlertrick
+* https://github.com/jlev/parler-etl
+* https://github.com/d-sanderson/yall-data-hasura
+* https://github.com/inomyabcs/parler-post-dump
+* https://github.com/ozywog/parler-data-tools
+* https://github.com/TheBlindEye/ParlerMetadata
+* https://github.com/sbooeshaghi/parlertrick
 
 ### Parsing Notes
 
