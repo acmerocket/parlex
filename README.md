@@ -21,12 +21,14 @@ The system will (eventually) consist of:
 * extractor: Parse an archive into a well-defined structure.
 * loader: Load extracted data into a data system: Export as CSV, SQL, JSON.
 * launcher: Launch a cloud/container instance with DB, load scripts and prepared queries.
+
  
 ## Working notes
 
 * researched tooling and existing libraries, found a python parsing lib and a docker impl.
 * installing tools and updates for docker tools, to try...
-
+* initial version of extractor is working
+* need to better understand the on-line dataset and how to access with... lambdas?
 
 Set up S3 access, as per https://ddosecrets.com/wiki/Parler
 

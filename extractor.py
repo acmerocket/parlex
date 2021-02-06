@@ -6,8 +6,10 @@
 import sys
 import logging
 import zipfile
+import tarfile
 
 from selectolax.parser import HTMLParser
+from pathlib import Path
 
 ## meta tags to ignore
 META_IGNORE = {"viewport", "og:type", "og:site_name", "twitter:card", "twitter:title", 
@@ -79,10 +81,11 @@ def extract_meta_attrs(dom):
 
 def process_file(data):
     attrs = parse_message(data)
-    print(attrs)
+    return attrs
+    #if len(attrs) > 0:
+    #    print(attrs)
 
-
-def extract_all(archive_name):
+def extract_zip(archive_name):
     zf = zipfile.ZipFile(archive_name)
 
     i = 0
@@ -97,13 +100,59 @@ def extract_all(archive_name):
 
     print("Extracted %s records", i)
 
+
+file_types = {}
+def extract_tgz(archive_name):
+
+    with tarfile.open(archive_name) as tar:
+        i = 0
+        for info in tar:
+            if info.isfile() and info.size > 0 and info.name.find("/post/") >= 0:
+                ext = Path(info.name).suffix
+                if len(ext) == 0:
+                    file_types["none"] = 1 + file_types.get("none", 0)
+                    #process_file(tar.extractfile(info.name).read())
+                    #i+=1
+                
+                for strippable in ["?", "&", ";"]:
+                    idx = ext.find(strippable)
+                    if idx >= 0:
+                        ext = ext[:idx]
+                        break
+                        #print(info.name, " --> ", ext)
+                    
+                if ext in [".png",".gif",".jpg",".jpeg"]:
+                    #print(info.name, info.size, "image")
+                    file_types[ext] = 1 + file_types.get(ext, 0)
+                elif ext in [".html",".htm"]:
+                    #print(info.name, info.size, "...process...")
+                    file_types[ext] = 1 + file_types.get(ext, 0)
+                    id = Path(info.name).stem
+                    attrs = process_file(tar.extractfile(info.name).read())
+                    print(id, "-:", attrs)
+                    i+=1
+                elif ext in [".text",".txt",".js",".css"]:
+                    #print(info.name, info.size, "text")
+                    file_types[ext] = 1 + file_types.get(ext, 0)
+                elif len(ext) > 0:
+                    file_types[ext] = 1 + file_types.get(ext, 0)
+                    #print(info.name, info.size, "unknown type:", ext, len(ext))
+
+            if i >= 100: break
+        print(file_types)
+        tar.close()
+    print("Extracted records:", i)
+
+
 def main():
     if len(sys.argv) == 0:
         process_file(open("pdb/untitled 4.html", "r").read()) ## simple test, move to test
     else:
         for filename in sys.argv:
             if filename.endswith(".zip"):
-                extract_all(filename)
+                extract_zip(filename)
+            elif filename.endswith((".tar.gz", ".tgz")):
+                extract_tgz(filename)
             else:
                 process_file(open(filename, "r").read())
 
