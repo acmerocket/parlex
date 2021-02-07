@@ -8,9 +8,11 @@
 import sys
 import logging
 import zipfile
+import tarfile
+import datetime
+from pathlib import Path
 
-
-def sample_archive(archive_name, count):
+def sample_zip_archive(archive_name, count):
     sizes = []
     print("loading data")
     with zipfile.ZipFile(archive_name) as zf:
@@ -25,8 +27,35 @@ def sample_archive(archive_name, count):
                 break
             zf.extract(info.filename, "test/resources")
 
+def sample_tgz(archive_name, count):
+    with tarfile.open(archive_name) as tar:
+        i = 0
+        infolist = tar.getmembers()
+        print("sorting file sizes")
+        infolist.sort(key=lambda z: z.size, reverse=True)
+        print("writing", count, "sample files")
+        for info in infolist:
+            # checking for '/post', there's probably a better way...
+            if "/post/" in info.name:
+                tar.extract(info.name, path="test/resources")
+                i+=1
+
+            if i >= count: break
+        tar.close()
+    print("Extracted records:", i)
+
+
+
 def main():
-    sample_archive(sys.argv[1], 100)
+    sample_size = 100
+    for filename in sys.argv[1:]:
+        if filename.endswith(".zip"):
+            sample_zip_archive(filename, sample_size)
+        elif filename.endswith((".tar.gz", ".tgz")):
+            sample_tgz(filename, sample_size)
+        else:
+            print("huh?", filename)
+            exit(1)
 
 
 if __name__ == '__main__':

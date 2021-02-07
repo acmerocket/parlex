@@ -3,10 +3,17 @@
 # Extract JSON data from a Parler archive, to import into DBs otherwise index.
 # by philion@acmerocket.com
 
+from metadata import extract_comments
 import sys
 import logging
 import zipfile
 import tarfile
+import dateparser
+import datetime
+import re
+import os
+
+import pandas as pd
 
 from selectolax.parser import HTMLParser
 from pathlib import Path
@@ -20,17 +27,19 @@ ATTR_MAP = {
     "title": "meta[property='og:title']",
     "description": "meta[name='description']",
     "messageid": "meta[property='og:url']",
-    "userid": "meta[property='og:image']",
-    "username": ".author--username",
-    "text": "div.card--body > p",
+    "profilepic": "meta[property='og:image']",
+    "username": ".post .author--username",
+    "body": ".post .card--body > p",
     "impressions": ".impressions--count",
     "link": ".mc-article--link > a",
-    "comments": ".pa--item--wrapper img[alt='Post Comments'] + .pa--item--count",
+    "timestr": ".post--timestamp",
+    "commentcount": ".pa--item--wrapper img[alt='Post Comments'] + .pa--item--count",
     "echoes": ".pa--item--wrapper img[alt='Post Echoes'] + .pa--item--count",
     "upvotes": ".pa--item--wrapper img[alt='Post Upvotes'] + .pa--item--count"
 }
 
-def parse_message(data):
+# scrape all interesting data from the message. doesn't transform or interpret anything
+def scrape_message(data):
     attrs = {}
     dom = HTMLParser(data)
 
@@ -61,7 +70,17 @@ def parse_message(data):
         else:
             logging.debug("skipping dup value: %s - %s", tag, value)
 
-    return attrs
+    # get the comments
+    comments = extract_comments(dom)
+    #if len(comments) > 0:
+        #print("###", comments)
+        #attrs["comments"] = comments
+        #if "commentcount" in attrs:
+        #    expected_count = int(attrs["commentcount"])
+        #    if len(comments) != expected_count:
+        #        logging.warning("Mismatched comment counts: count=%s, length=%s", expected_count, len(comments))
+
+    return attrs, comments
         
 def extract_meta_attrs(dom):
     attrs = {}
@@ -79,11 +98,58 @@ def extract_meta_attrs(dom):
     return attrs
 
 
-def process_file(data):
-    attrs = parse_message(data)
-    return attrs
-    #if len(attrs) > 0:
-    #    print(attrs)
+
+# borrowed from https://github.com/jlev/parler-etl/blob/master/transform-post-html-to-jsonl.py
+# timestr represents something like "5 days ago", and is used to calulate against the download/extract time
+# origin_time from the archive or file system 
+def parse_relative_time(timestr, origin_time):
+    if timestr is None:
+        return None
+
+    dt_parsed = dateparser.parse(timestr, languages=['en'])
+
+    try:
+        if re.search('[a-zA-Z]', timestr):
+            offset = datetime.datetime.now() - dt_parsed
+            dt_approx = origin_time - offset
+            #print("...parsed time", origin_time, ",", timestr, ":", dt_approx, "parsed:", dt_parsed)
+        else:
+            dt_approx = dt_parsed
+        return dt_approx
+    except Exception as e:
+        print(f"Failed to parse datetime with timestamp: {timestr}, offset: {origin_time}: {e}")
+        return None
+    except KeyboardInterrupt:
+        raise
+
+# parse a buffer into useable metadata
+def process_html(data, id, filedate):
+    # parse into main message and sub-comments
+    # fixme - scrape to record, not dict
+    msg, comments = scrape_message(data)
+    msg["id"] = id
+
+    # process timestamp
+    if "timestr" in msg:
+        timestamp = parse_relative_time(msg["timestr"], filedate)
+        if timestamp:
+            msg["timestamp"] = timestamp.strftime("%c") # fixme to reliable struct
+
+    print(msg) # FIXME as json.
+
+    # process comments
+    for i, comment in enumerate(comments):
+        comment["id"] = id + "_" + str(i)
+        comment["refer"] = id
+        if "timestr" in msg:
+            timestamp = parse_relative_time(msg["timestr"], filedate)
+            if timestamp:
+                comment["timestamp"] = timestamp.strftime("%c") # fixme to reliable struct
+        #print(comment)
+    
+    comments.insert(0, msg)
+    do_csv(comments)
+
 
 def extract_zip(archive_name):
     zf = zipfile.ZipFile(archive_name)
@@ -93,7 +159,7 @@ def extract_zip(archive_name):
     for info in zf.infolist():
         try:    
             data = zf.read(info.filename)
-            process_file(data)
+            process_html(data)
             i = i+1
         except KeyError:
             logging.error("Did not find %s in zip file" % info.filename)
@@ -107,54 +173,50 @@ def extract_tgz(archive_name):
     with tarfile.open(archive_name) as tar:
         i = 0
         for info in tar:
+            # checking for '/post', there's probably a better way...
             if info.isfile() and info.size > 0 and info.name.find("/post/") >= 0:
-                ext = Path(info.name).suffix
+                name = info.name
+                for strippable in ["?", "&", ";"]:
+                    idx = name.find(strippable)
+                    if idx >= 0:
+                        name = name[:idx]
+                        break
+
+                ext = Path(name).suffix
                 if len(ext) == 0:
                     file_types["none"] = 1 + file_types.get("none", 0)
-                    #process_file(tar.extractfile(info.name).read())
-                    #i+=1
-                
-                for strippable in ["?", "&", ";"]:
-                    idx = ext.find(strippable)
-                    if idx >= 0:
-                        ext = ext[:idx]
-                        break
-                        #print(info.name, " --> ", ext)
-                    
-                if ext in [".png",".gif",".jpg",".jpeg"]:
-                    #print(info.name, info.size, "image")
+                else:
                     file_types[ext] = 1 + file_types.get(ext, 0)
-                elif ext in [".html",".htm"]:
-                    #print(info.name, info.size, "...process...")
-                    file_types[ext] = 1 + file_types.get(ext, 0)
-                    id = Path(info.name).stem
-                    attrs = process_file(tar.extractfile(info.name).read())
-                    print(id, "-:", attrs)
-                    i+=1
-                elif ext in [".text",".txt",".js",".css"]:
-                    #print(info.name, info.size, "text")
-                    file_types[ext] = 1 + file_types.get(ext, 0)
-                elif len(ext) > 0:
-                    file_types[ext] = 1 + file_types.get(ext, 0)
-                    #print(info.name, info.size, "unknown type:", ext, len(ext))
 
-            if i >= 100: break
+                if ext in [".html",".htm"]:
+                    id = Path(info.name).stem
+                    data = tar.extractfile(info.name).read()
+                    # construct a download timestamp for the file
+                    timestamp = datetime.datetime.utcfromtimestamp(info.mtime)
+                    #print(id, timestamp)
+                    attrs = process_html(data, id, timestamp)
+                    i+=1
+
+            if i >= 10: break
         print(file_types)
         tar.close()
     print("Extracted records:", i)
 
 
+# output csv
+def do_csv(messages):
+    df = pd.DataFrame(messages)
+    df.to_csv("testdata.csv")
+
 def main():
-    if len(sys.argv) == 0:
-        process_file(open("pdb/untitled 4.html", "r").read()) ## simple test, move to test
-    else:
-        for filename in sys.argv:
-            if filename.endswith(".zip"):
-                extract_zip(filename)
-            elif filename.endswith((".tar.gz", ".tgz")):
-                extract_tgz(filename)
-            else:
-                process_file(open(filename, "r").read())
+    for filename in sys.argv[1:]:
+        if filename.endswith(".zip"):
+            extract_zip(filename)
+        elif filename.endswith((".tar.gz", ".tgz")):
+            extract_tgz(filename)
+        else:
+            timestamp = datetime.datetime.utcfromtimestamp(os.stat(filename).st_mtime)
+            process_html(open(filename, "r").read(), filename, timestamp)
 
 
 if __name__ == '__main__':

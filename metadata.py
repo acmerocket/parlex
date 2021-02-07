@@ -114,27 +114,27 @@ def extract_meta_attrs(dom):
     return attrs
 
 COMMENT_MAPPING = {
-    "body": ".card--body",
+    "body": "div.card--body > *",
     "name": ".author--name",
     "username": ".author--username",
     "replies": ".ca--item--wrapper img[alt='Replies'] + .ca--item--count",
     "echoes": ".ca--item--wrapper img[alt='Post Echoes'] + .ca--item--count",
-    "upvotes": ".ca--item--wrapper img[alt='Post Upvotes'] + .ca--item--count"
-
-    #"badge": ".ch--avatar--badge--wrapper",
-    #"avatar": ".ch--avatar--wrapper",
-    #"profile": ".pf--jccard-meta--row"
+    "upvotes": ".ca--item--wrapper img[alt='Post Upvotes'] + .ca--item--count",
+    "profile": "a.card-meta--row",
+    "profilepic": "div.ch--avatar--wrapper > img",
+    "timestr": "span.post--timestamp"
 }
 # Reurns an array of 
 def extract_comments(dom):
     data = {}
     comments = []
 
-    for comment_node in dom.css("div.reply--card--wrapper"):
+    for comment_node in dom.css(".reply--card--wrapper"):
         comment = {}
         for key, select in COMMENT_MAPPING.items():
             for node in comment_node.css(select):
-                value = node.text(strip=True)
+                #value = node.text(strip=True)
+                value = nodevalue(node)
                 #print("--", key, value)
                 comment[key] = value
 
