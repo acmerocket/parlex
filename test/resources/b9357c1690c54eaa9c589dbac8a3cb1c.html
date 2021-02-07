@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Parler Free Speech Social Network</title>
+    <base href="">
+    <!-- Comment For Test Purposes -->
+    <link rel="manifest" href="https://parler.com/manifest.json">
+    <meta name="theme-color" content="#BE1E2C">
+    <script type="text/javascript">
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            })
+            .catch(function(err) {
+                console.log('Service Worker reg failed: ', err);
+            });
+        }
+    </script>
+    <link href="../../fonts.googleapis.com/icon%3Ffamily=Material+Icons.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Parler is an unbiased social media focused on real user experiences and engagement. Free expression without violence and no censorship. Parler never shares your personal data.">
+    <meta property="og:title" content="Parler Free Speech Social Network">
+    <meta property="og:description" content="Parler is an unbiased social media focused on real user experiences and engagement. Free expression without violence and no censorship. Parler never shares your personal data.">
+    <meta property="og:image" content=" assets/img/app-icons/icon-384x384.png">
+    <meta name="twitter:title" content="Parler Free Speech Social Network ">
+    <meta name="twitter:description" content="Parler is an unbiased social media focused on real user experiences and engagement. Free expression without violence and no censorship. Parler never shares your personal data.">
+    <meta name="twitter:image" content=" assets/img/app-icons/icon-384x384.png">
+    <link rel="icon" type="image/x-icon" href="https://parler.com/favicon.ico">
+<link rel="stylesheet" href="../styles.08dbf2a1e56ae8e3ae46.css.html"></head>
+
+<body style="width: 100vw;">
+    <app-root id="root-wrapper">
+        <style>
+            /* These go in here so they get discarded after our app is loaded */
+            app-root {
+                background-color: #e1e7eb;
+            }
+
+            #main-index-background {
+                position: relative;
+                display: block;
+                width: 100vw;
+                height: 100vh;
+            }
+
+            #main-index-svg-wrapper {
+                position: relative;
+                top: 50%;
+                transform: translateY(-50%);
+                text-align: center;
+            }
+
+            .logo-path {
+                stroke-dasharray: 800 800;
+                stroke-dashoffset: 800;
+                animation-duration: 2s;
+                animation-name: draw;
+                animation-iteration-count: infinite;
+                animation-direction: alternate;
+                animation-timing-function: linear;
+            }
+
+            @keyframes draw {
+                from {
+                    stroke-dashoffset: 800;
+                }
+
+                to {
+                    stroke-dashoffset: 0;
+                }
+            }
+            .path {
+                stroke-dasharray: 500;
+                stroke-dashoffset: 500;
+                animation: dash 3s linear alternate infinite;
+            }
+
+            .path2 {
+                stroke-dasharray: 500;
+                stroke-dashoffset: 500;
+                animation: dash2 3s linear alternate infinite;
+            }
+
+            #parler-loader {
+                width: 320px;
+                height: 320px;
+            }
+
+            @keyframes dash {
+                from {
+                stroke-dashoffset: 822;
+                }
+                to {
+                stroke-dashoffset: 0;
+                }
+            }
+
+            @keyframes dash2 {
+                from {
+                stroke-dashoffset: 822;
+                }
+                to {
+                stroke-dashoffset: 0;
+                }
+            }
+        </style>
+        <div id="main-index-background">
+            <div id="main-index-svg-wrapper">
+                <svg id="parler-loader" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 101.7 101.7"><defs></defs><title>Parler</title><path class="path" fill="white" stroke="#c63240" stroke-width="1" d="M59.34,84.31h-25V75.82a8.13,8.13,0,0,1,8.14-8.14H59.34a24.94,24.94,0,1,0,0-49.88h-.25l-5.31-.17H1A16.64,16.64,0,0,1,17.63,1H54l5.44.17a41.57,41.57,0,1,1-.14,83.14Z"/><path class="path2" fill="white" stroke="#c63240" stroke-width="1" d="M17.65,101h0A16.64,16.64,0,0,1,1,84.37V50.5A16.15,16.15,0,0,1,17.17,34.34H59.36a8.31,8.31,0,0,1,8.32,8.32h0A8.31,8.31,0,0,1,59.36,51H25.86a8.22,8.22,0,0,0-8.21,8.21Z"/></svg>
+            </div>
+        </div>
+    </app-root>
+  <noscript>Please enable JavaScript to continue using this application.</noscript>
+<script src="../runtime-es2015.46c3b9f1bfa55bdc181a.js.html" type="module"></script><script src="../runtime-es5.46c3b9f1bfa55bdc181a.js.html" nomodule defer></script><script src="../polyfills-es5.c3b6b2c71c11c40a3336.js.html" nomodule defer></script><script src="../polyfills-es2015.3badeab7f4f96d98d992.js.html" type="module"></script><script src="../scripts.d0a05106c546229fdd34.js.html" defer></script><script src="../main-es2015.0a7024030de5c9ed8493.js.html" type="module"></script><script src="../main-es5.0a7024030de5c9ed8493.js.html" nomodule defer></script></body>
+
+</html>

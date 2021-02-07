@@ -1,0 +1,53 @@
+/* eslint-disable */
+document.addEventListener('DOMContentLoaded', () => {
+  // Parler Media Sliders Init
+  const sliders = document.getElementsByClassName('mc--slider--wrapper');
+  // Using Array.prototype b/c 'sliders' is a node list not a true array
+  Array.prototype.forEach.call(sliders, (slider) => {
+    const sliderId = slider.id;
+    new McSlider(sliderId);
+  });
+}, false);
+
+// Main Toolbar > Open Sidenav
+function sidenavOpen() {
+  document.getElementById('main-sidenav--container').classList.add('sidenav--open');
+  document.getElementsByTagName('body')[0].classList.add('scroll-lock');
+  document.getElementById('sidenav--overlay-blocker').classList.add('expose');
+}
+
+// Main Toolbar > Close Sidenav
+function sidenavClose() {
+  document.getElementById('main-sidenav--container').classList.remove('sidenav--open');
+  document.getElementsByTagName('body')[0].classList.remove('scroll-lock');
+  document.getElementById('sidenav--overlay-blocker').classList.remove('expose');
+}
+
+function commentsListOpen(postID) {
+  document.getElementById(`comments-list-${postID}`).classList.add('show');
+  document.getElementById(`show-comments-${postID}`).classList.add('opened');
+  document.getElementById(`hide-comments-${postID}`).classList.add('opened');
+}
+
+function commentsListClose(postID) {
+  document.getElementById(`comments-list-${postID}`).classList.remove('show');
+  document.getElementById(`show-comments-${postID}`).classList.remove('opened');
+  document.getElementById(`hide-comments-${postID}`).classList.remove('opened');
+}
+
+function repliesListOpen(commentID) {
+  document.getElementById(`replies-list-${commentID}`).classList.add('show');
+  document.getElementById(`show-replies-${commentID}`).classList.add('opened');
+  document.getElementById(`hide-replies-${commentID}`).classList.add('opened');
+}
+
+function repliesListClose(commentID) {
+  document.getElementById(`replies-list-${commentID}`).classList.remove('show');
+  document.getElementById(`show-replies-${commentID}`).classList.remove('opened');
+  document.getElementById(`hide-replies-${commentID}`).classList.remove('opened');
+}
+
+function toggleSensitive(postID) {
+  document.getElementById(`sensitive--content--wrapper-${postID}`).classList.add('desensitize');
+  document.getElementById(`sensitive--content-action-${postID}`).classList.add('desensitize');
+}

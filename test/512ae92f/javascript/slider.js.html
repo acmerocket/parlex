@@ -1,0 +1,56 @@
+/* eslint-disable */
+//
+// Parler Media Container Slider
+// Posts/Comments
+//
+class McSlider {
+  constructor(sliderId) {
+    const slider = document.querySelector(`#${sliderId}`);
+    const slides = slider.getElementsByClassName('mc--slide');
+    const navDots = slider.getElementsByClassName('nav-dot');
+    const itemCount = slides.length;
+    const nextItem = slider.querySelector('.next');
+    const previousItem = slider.querySelector('.previous');
+    let count = 0;
+
+    function showNextSlide() {
+      slides[count].classList.remove('active');
+      navDots[count].classList.remove('active');
+      if (count < itemCount - 1) {
+        count++;
+      } else {
+        count = 0;
+      }
+      slides[count].classList.add('active');
+      navDots[count].classList.add('active');
+    }
+
+    function showPrevSlide() {
+      slides[count].classList.remove('active');
+      navDots[count].classList.remove('active');
+      if (count > 0) {
+        count--;
+      } else {
+        count = itemCount - 1;
+      }
+      slides[count].classList.add('active');
+      navDots[count].classList.add('active');
+    }
+
+    function navDotSelect($event) {
+      const selectedIndex = $event.target.id;
+      slides[count].classList.remove('active');
+      navDots[count].classList.remove('active');
+      count = selectedIndex;
+      slides[count].classList.add('active');
+      navDots[count].classList.add('active');
+    }
+
+    nextItem.addEventListener('click', showNextSlide);
+    previousItem.addEventListener('click', showPrevSlide);
+    // Using Array.prototype b/c 'navDots' is a node list not a true array
+    Array.prototype.forEach.call(navDots, (navDot) => {
+      navDot.addEventListener('click', navDotSelect);
+    });
+  }
+}

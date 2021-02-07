@@ -68,7 +68,7 @@ def scrape_tags(dom):
 
 # nodevalue - determine is there is a worthwile value in the node (text or attribute) and return it, or None.  
 def nodevalue(node):
-    text = node.text(deep=False, strip=True)
+    text = node.text(strip=True) # note: deep is default, might be too much
     if text is not None and len(text) > 0:
         return text
     else:
@@ -124,18 +124,21 @@ COMMENT_MAPPING = {
     "profilepic": "div.ch--avatar--wrapper > img",
     "timestr": "span.post--timestamp"
 }
+
+# .reply--card--wrapper .card--comment-container <- sub-comments 
+
+
 # Reurns an array of 
 def extract_comments(dom):
     data = {}
     comments = []
 
-    for comment_node in dom.css(".reply--card--wrapper"):
+    # todo: still not picking up the full structure of comments and replys. 
+    for comment_node in dom.css(".card--comment-container"):
         comment = {}
         for key, select in COMMENT_MAPPING.items():
             for node in comment_node.css(select):
-                #value = node.text(strip=True)
                 value = nodevalue(node)
-                #print("--", key, value)
                 comment[key] = value
 
         comments.append(comment)

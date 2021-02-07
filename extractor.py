@@ -10,8 +10,9 @@ import zipfile
 import tarfile
 import dateparser
 import datetime
-import re
+#import re
 import os
+import json
 
 import pandas as pd
 
@@ -31,7 +32,8 @@ ATTR_MAP = {
     "username": ".post .author--username",
     "body": ".post .card--body > p",
     "impressions": ".impressions--count",
-    "link": ".mc-article--link > a",
+    "articlelink": ".mc-article--link",
+    "weblink": ".mc-website--link",
     "timestr": ".post--timestamp",
     "commentcount": ".pa--item--wrapper img[alt='Post Comments'] + .pa--item--count",
     "echoes": ".pa--item--wrapper img[alt='Post Echoes'] + .pa--item--count",
@@ -102,6 +104,8 @@ def extract_meta_attrs(dom):
 # borrowed from https://github.com/jlev/parler-etl/blob/master/transform-post-html-to-jsonl.py
 # timestr represents something like "5 days ago", and is used to calulate against the download/extract time
 # origin_time from the archive or file system 
+
+time_strs = {}
 def parse_relative_time(timestr, origin_time):
     if timestr is None:
         return None
@@ -109,15 +113,15 @@ def parse_relative_time(timestr, origin_time):
     dt_parsed = dateparser.parse(timestr, languages=['en'])
 
     try:
-        if re.search('[a-zA-Z]', timestr):
+        if "ago" in timestr:
+            time_strs[timestr] = timestr # tracking all the time strings in the sample
             offset = datetime.datetime.now() - dt_parsed
             dt_approx = origin_time - offset
-            #print("...parsed time", origin_time, ",", timestr, ":", dt_approx, "parsed:", dt_parsed)
         else:
             dt_approx = dt_parsed
         return dt_approx
     except Exception as e:
-        print(f"Failed to parse datetime with timestamp: {timestr}, offset: {origin_time}: {e}")
+        logging.error(f"Failed to parse datetime with timestamp: {timestr}, offset: {origin_time}: {e}")
         return None
     except KeyboardInterrupt:
         raise
@@ -135,7 +139,7 @@ def process_html(data, id, filedate):
         if timestamp:
             msg["timestamp"] = timestamp.strftime("%c") # fixme to reliable struct
 
-    print(msg) # FIXME as json.
+    #print(msg) # FIXME as json.
 
     # process comments
     for i, comment in enumerate(comments):
@@ -148,8 +152,7 @@ def process_html(data, id, filedate):
         #print(comment)
     
     comments.insert(0, msg)
-    do_csv(comments)
-
+    return comments
 
 def extract_zip(archive_name):
     zf = zipfile.ZipFile(archive_name)
@@ -172,6 +175,7 @@ def extract_tgz(archive_name):
 
     with tarfile.open(archive_name) as tar:
         i = 0
+        allmsg = []
         for info in tar:
             # checking for '/post', there's probably a better way...
             if info.isfile() and info.size > 0 and info.name.find("/post/") >= 0:
@@ -194,19 +198,32 @@ def extract_tgz(archive_name):
                     # construct a download timestamp for the file
                     timestamp = datetime.datetime.utcfromtimestamp(info.mtime)
                     #print(id, timestamp)
-                    attrs = process_html(data, id, timestamp)
+                    messages = process_html(data, id, timestamp)
+                    allmsg += messages
                     i+=1
 
-            if i >= 10: break
-        print(file_types)
+            if i >= 1000: break
+        print(to_json(allmsg))
+        print("File types:", file_types)
+        print("Times:", time_strs)
         tar.close()
-    print("Extracted records:", i)
+    print("Extracted records:", len(allmsg))
 
+def extract_file(filename):
+    file = open(filename, "r")
+    id = Path(filename).stem
+    timestamp = datetime.datetime.utcfromtimestamp(os.stat(filename).st_mtime)
+    messages = process_html(file.read(), id, timestamp)
+    file.close()
+    return messages
 
 # output csv
-def do_csv(messages):
-    df = pd.DataFrame(messages)
-    df.to_csv("testdata.csv")
+def to_csv(messages):
+    return pd.DataFrame(messages).to_csv()
+
+def to_json(messages):
+    return json.dumps(messages, indent=4)
+
 
 def main():
     for filename in sys.argv[1:]:
@@ -215,9 +232,8 @@ def main():
         elif filename.endswith((".tar.gz", ".tgz")):
             extract_tgz(filename)
         else:
-            timestamp = datetime.datetime.utcfromtimestamp(os.stat(filename).st_mtime)
-            process_html(open(filename, "r").read(), filename, timestamp)
-
+            messages = extract_file(filename)
+            print(to_json(messages))
 
 if __name__ == '__main__':
     sys.exit(main())

@@ -116,6 +116,14 @@ First pass, pull...
 * username
 * text
 
+### Post Structure
+
+Each post has an ID that can be used to look it up on archive.org. 
+
+Each post is wrapped by card--post--container.
+
+A raw echo is wrapped by echo-byline--wrapper, reference in eb--statement, eb--timestamp
+
 ### Comments
 
 'at' ??
