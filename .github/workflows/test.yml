@@ -15,12 +15,12 @@ jobs:
 
       - name: Install dependencies with pipenv
         run: |
-          pip install pipenv isort black flake8 mypy pytest
+          pip install pipenv pytest
           pipenv install --deploy --dev
 
       #- run: pipenv run isort . --recursive --diff
       #- run: pipenv run black --check .
       #- run: pipenv run flake8 
       #- run: pipenv run mypy
-      - run: pipenv run pytest --cov
+      - run: pipenv run pytest
       
