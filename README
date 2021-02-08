@@ -4,6 +4,22 @@ A parler dataset parser written in Python. Intended to work form origin Parler H
 
 Also builds standard dataset for loading directly into SQL, document and graph databases, allowing easy data loading from trusted sources. Finally, wraps everything in a few Docker commands and some cloud deployment instructions so everything can be launched to the cloud with existing, open datasets and a ready-to-go DB instance.
 
+## Running
+
+    ./extractor.py some-big-archive.tgz
+    
+## Test & Build
+
+    make test
+    
+or
+
+    pipenv run python -m unittest discover
+    
+If you're not running pipenv, try:
+
+    pip install pipenv
+
 ### Current Status: work-in-progress
 
 I've got an initial data parser working, that parses a compressed web archive into a series of py dicts that look like:
@@ -14,6 +30,9 @@ I've got an initial data parser working, that parses a compressed web archive in
     {'title': '@WilburC - WilburC - This was unjustified,Murder!', 'description': 'This was unjustified,Murder!', 'messageid': '/post/c7a954b5201d40d6ba07cf1de68ebafa', 'userid': 'https://images.parler.com/d64c43bfa6a94a1bba2e6c1ee5eb49d7_256', 'username': '@WilburC', 'text': 'This was unjustified,Murder!', 'impressions': '27', 'comments': '12', 'echoes': '27', 'upvotes': '26'}
     {'title': '@GCGI - GCGI - ', 'description': 'Parleyed on Parler', 'messageid': '/post/89eeb62c1f814e6d9c706caccdd059cc', 'userid': 'https://company-media.parler.com/par-default-profile-picture.jpg', 'username': '@BeachMilk', 'text': 'ANTIFA weapons being staged over DC march-area including the obligatory piles of bricks.', 'impressions': '11602', 'comments': '27', 'echoes': '93', 'upvotes': '89'}
 
+Added some basic timestamp handling and estimation, comments and articles. Able to output CSV and JSON. (no fancy CLI options yet, just code).
+
+Enough in place that I'm starting to identify gaps in the data and missing fields. This is leading me to add testing and specific unit tests for any data I track down at this point.
 
 ## Design
 
