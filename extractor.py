@@ -10,7 +10,6 @@ import zipfile
 import tarfile
 import dateparser
 import datetime
-#import re
 import os
 import json
 
@@ -18,6 +17,10 @@ import pandas as pd
 
 from selectolax.parser import HTMLParser
 from pathlib import Path
+
+# logging
+LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s: %(message)s"
+logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
 ## meta tags to ignore
 META_IGNORE = {"viewport", "og:type", "og:site_name", "twitter:card", "twitter:title", 
