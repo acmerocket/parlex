@@ -1,6 +1,9 @@
 # Ignore data dir, don't wan't to upload datasets
 data/
 
+# Ignore code settings
+.vscode/
+
 # F*ckin Apple
 .DS_Store
 
