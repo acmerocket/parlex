@@ -11,18 +11,20 @@ import sys
 import logging
 import boto3
 
+
 def visit_bucket(bucket_name):
     # Retrieve the list of existing buckets
-    s3 = boto3.client('s3')
+    s3 = boto3.client("s3")
 
     # Output the bucket names
-    print('Existing buckets:')
+    print("Existing buckets:")
     for bucket in s3.list_buckets(RequestPayer=True):
         print(f'  {bucket["Name"]}')
+
 
 def main():
     visit_bucket("ddosecrets-parler")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

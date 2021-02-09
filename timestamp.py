@@ -13,16 +13,18 @@ def parse_datetime(timestr, origin_time):
     if timestr is None:
         return None
 
-    dt_parsed = dateparser.parse(timestr, languages=['en'])
+    dt_parsed = dateparser.parse(timestr, languages=["en"])
 
     try:
-        if re.search('[a-zA-Z]', timestr):
+        if re.search("[a-zA-Z]", timestr):
             dt_approx = dt_parsed - origin_time
         else:
-            dt_approx = dateparser.parse(timestr, languages=['en'])
+            dt_approx = dateparser.parse(timestr, languages=["en"])
         return dt_approx
     except Exception as e:
-        print(f"Failed to parse datetime with timestamp: {timestr}, offset: {origin_time}: {e}")
+        print(
+            f"Failed to parse datetime with timestamp: {timestr}, offset: {origin_time}: {e}"
+        )
         return None
     except KeyboardInterrupt:
         raise

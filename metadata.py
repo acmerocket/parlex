@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Scrape metadata from a compressed archive. 
+# Scrape metadata from a compressed archive.
 # Currently, just some tools to example the dataset and find taggable data.
 
 # by philion@acmerocket.com
@@ -15,11 +15,21 @@ import os
 from selectolax.parser import HTMLParser
 
 ## meta tags to ignore
-META_IGNORE = {"viewport", "og:type", "og:site_name", "twitter:card", "twitter:title", 
-        "twitter:description", "twitter:site", "twitter:image", "description",
-        "theme-color"}
+META_IGNORE = {
+    "viewport",
+    "og:type",
+    "og:site_name",
+    "twitter:card",
+    "twitter:title",
+    "twitter:description",
+    "twitter:site",
+    "twitter:image",
+    "description",
+    "theme-color",
+}
 
-#ALL_TAGS = {}
+# ALL_TAGS = {}
+
 
 def og_metadata(dom):
     attrs = {}
@@ -31,13 +41,14 @@ def og_metadata(dom):
 
     return attrs
 
+
 def sample_archive(archive_name, count):
 
     zf = zipfile.ZipFile(archive_name)
 
     i = 0
     for info in zf.infolist():
-        try:    
+        try:
             data = zf.read(info.filename)
             process_file(data)
             i += 1
@@ -47,8 +58,8 @@ def sample_archive(archive_name, count):
     print("processed %s records", i)
 
 
-# scrape_tags - low-level data scraping indented for verification and coverage. 
-# Desired metadata is captured "structurally" with CSS selectors, while this captures 
+# scrape_tags - low-level data scraping indented for verification and coverage.
+# Desired metadata is captured "structurally" with CSS selectors, while this captures
 # all data to verify is anything is missing.
 def scrape_tags(dom):
     attrs = {}
@@ -56,7 +67,7 @@ def scrape_tags(dom):
         value = nodevalue(node)
         if value is not None:
             name = nodename(node)
-            #print(name, " -> ", value)
+            # print(name, " -> ", value)
 
             # check for duplicate key
             if name not in attrs:
@@ -66,9 +77,9 @@ def scrape_tags(dom):
     return attrs
 
 
-# nodevalue - determine is there is a worthwile value in the node (text or attribute) and return it, or None.  
+# nodevalue - determine is there is a worthwile value in the node (text or attribute) and return it, or None.
 def nodevalue(node):
-    text = node.text(strip=True) # note: deep is default, might be too much
+    text = node.text(strip=True)  # note: deep is default, might be too much
     if text is not None and len(text) > 0:
         return text
     else:
@@ -76,11 +87,12 @@ def nodevalue(node):
         for attr in ["content", "href", "src"]:
             if attr in node.attributes:
                 return node.attributes[attr]
-    
+
     # some data splunking
-    if (len(node.attributes) > 0):
+    if len(node.attributes) > 0:
         logging.debug("No value found for:", node.attributes)
     return None
+
 
 # nodename - derive a name for the node, based on metadata or structure in DOM.
 def nodename(node):
@@ -88,7 +100,7 @@ def nodename(node):
     for attr in ["id", "name", "property"]:
         if attr in node.attributes:
             return node.attributes[attr]
-    
+
     # no known name, construct from class?
     name = ""
     if "class" in node.attributes:
@@ -113,6 +125,7 @@ def extract_meta_attrs(dom):
 
     return attrs
 
+
 COMMENT_MAPPING = {
     "body": "div.card--body > *",
     "name": ".author--name",
@@ -122,18 +135,18 @@ COMMENT_MAPPING = {
     "upvotes": ".ca--item--wrapper img[alt='Post Upvotes'] + .ca--item--count",
     "profile": "a.card-meta--row",
     "profilepic": "div.ch--avatar--wrapper > img",
-    "timestr": "span.post--timestamp"
+    "timestr": "span.post--timestamp",
 }
 
-# .reply--card--wrapper .card--comment-container <- sub-comments 
+# .reply--card--wrapper .card--comment-container <- sub-comments
 
 
-# Reurns an array of 
+# Reurns an array of
 def extract_comments(dom):
     data = {}
     comments = []
 
-    # todo: still not picking up the full structure of comments and replys. 
+    # todo: still not picking up the full structure of comments and replys.
     for comment_node in dom.css(".card--comment-container"):
         comment = {}
         for key, select in COMMENT_MAPPING.items():
@@ -145,6 +158,7 @@ def extract_comments(dom):
 
     return comments
 
+
 def process_file(data):
     # build a dom
     dom = HTMLParser(data)
@@ -152,15 +166,14 @@ def process_file(data):
     comments = extract_comments(dom)
 
     # Process all the tags in the file to
-    #og_tags = og_metadata(dom) 
-    #other_metadata = extract_meta_attrs(dom)
-    
+    # og_tags = og_metadata(dom)
+    # other_metadata = extract_meta_attrs(dom)
+
     tags = scrape_tags(dom)
 
     pp = pprint.PrettyPrinter(indent=4, width=160)
     pp.pprint(comments)
-    #pp.pprint(other_metadata)
-
+    # pp.pprint(other_metadata)
 
 
 def extract_all(archive_name):
@@ -169,18 +182,21 @@ def extract_all(archive_name):
     i = 0
 
     for info in zf.infolist():
-        try:    
+        try:
             data = zf.read(info.filename)
             process_file(data)
-            i = i+1
+            i = i + 1
         except KeyError:
             logging.error("Did not find %s in zip file" % info.filename)
 
     print("Extracted %s records", i)
 
+
 def main():
     if len(sys.argv) == 0:
-        process_file(open("pdb/untitled 4.html", "r").read()) ## simple test, move to test
+        process_file(
+            open("pdb/untitled 4.html", "r").read()
+        )  ## simple test, move to test
     else:
         for filename in sys.argv:
             if filename.endswith(".zip"):
@@ -193,5 +209,5 @@ def main():
                 process_file(open(filename, "r").read())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

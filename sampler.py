@@ -12,6 +12,7 @@ import tarfile
 import datetime
 from pathlib import Path
 
+
 def sample_zip_archive(archive_name, count):
     sizes = []
     print("loading data")
@@ -22,10 +23,11 @@ def sample_zip_archive(archive_name, count):
         infolist.sort(key=lambda z: z.file_size, reverse=True)
         print("writing", count, "sample files")
         for info in infolist:
-            i+=1
+            i += 1
             if i >= count:
                 break
             zf.extract(info.filename, "test/resources")
+
 
 def sample_tgz(archive_name, count):
     with tarfile.open(archive_name) as tar:
@@ -38,12 +40,12 @@ def sample_tgz(archive_name, count):
             # checking for '/post', there's probably a better way...
             if "/post/" in info.name:
                 tar.extract(info.name, path="test/resources")
-                i+=1
+                i += 1
 
-            if i >= count: break
+            if i >= count:
+                break
         tar.close()
     print("Extracted records:", i)
-
 
 
 def main():
@@ -58,5 +60,5 @@ def main():
             exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())
