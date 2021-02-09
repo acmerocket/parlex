@@ -1,7 +1,7 @@
 .PHONY:	setup test lint ci
 
 test: setup
-	pytest
+	pytest -cov=. tests/
 
 setup:
 	pip install --quiet -r requirements.txt
@@ -13,6 +13,9 @@ lint: setup
 	flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
 # TODO Add code coverage and doc reports. Store somewhere on github as part of action.
+format:
+	black .
+	black test/
 
 # make all reports and such for a CI system
 ci: lint test

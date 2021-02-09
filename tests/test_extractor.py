@@ -1,5 +1,9 @@
-from extractor import extract_file, to_json
+
 import unittest
+
+from pathlib import Path
+
+from parlex.extractor import extract_file
 
 # import logging
 
@@ -7,13 +11,12 @@ import unittest
 # LOG_FORMAT = "%(asctime)s %(name)s: %(message)s"
 # logging.basicConfig(level=logging.INFO, format = LOG_FORMAT)
 
-
-RESOURCES = "test/resources/"
-
+RESOURCES = "tests/resources/"
 
 class TestExtractor(unittest.TestCase):
     def test_weblink(self):
-        extracted = extract_file(RESOURCES + "4beec3bf2543403b8c32abcacbc59530.html")
+        file = Path(RESOURCES + "4beec3bf2543403b8c32abcacbc59530.html").absolute()
+        extracted = extract_file(file)
         self.assertGreater(len(extracted), 0)
         self.assertIn("weblink", extracted[0])
         self.assertTrue(extracted[0]["weblink"].startswith("https://rumble.com/"))

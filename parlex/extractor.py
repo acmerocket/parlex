@@ -3,7 +3,7 @@
 # Extract JSON data from a Parler archive, to import into DBs otherwise index.
 # by philion@acmerocket.com
 
-from metadata import extract_comments
+from .metadata import extract_comments
 import sys
 import logging
 import zipfile

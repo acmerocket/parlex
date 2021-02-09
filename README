@@ -67,6 +67,9 @@ And mounted S3 as per https://cloudkul.com/blog/mounting-s3-bucket-linux-ec2-ins
     mkdir /mnt/ddosecrets-parler
     s3fs ddosecrets-parler -o requester_pays -o use_cache=/tmp -o allow_other -o uid=1001 -o mp_umask=002 -o multireq_max=5 /mnt/ddosecrets-parler
 
+Refactoring test structure to match https://docs.python-guide.org/writing/structure/
+
+
 
 Interesting... https://colab.research.google.com/github/sbooeshaghi/parlertrick/blob/main/parler.ipynb
 
