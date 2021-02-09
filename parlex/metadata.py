@@ -7,14 +7,13 @@
 
 import sys
 import logging
-from typing import Text
 import zipfile
 import pprint
 import os
 
 from selectolax.parser import HTMLParser
 
-## meta tags to ignore
+# meta tags to ignore
 META_IGNORE = {
     "viewport",
     "og:type",
@@ -143,7 +142,7 @@ COMMENT_MAPPING = {
 
 # Reurns an array of
 def extract_comments(dom):
-    data = {}
+    # data = {}
     comments = []
 
     # todo: still not picking up the full structure of comments and replys.
@@ -169,7 +168,7 @@ def process_file(data):
     # og_tags = og_metadata(dom)
     # other_metadata = extract_meta_attrs(dom)
 
-    tags = scrape_tags(dom)
+    # tags = scrape_tags(dom)
 
     pp = pprint.PrettyPrinter(indent=4, width=160)
     pp.pprint(comments)
@@ -196,7 +195,7 @@ def main():
     if len(sys.argv) == 0:
         process_file(
             open("pdb/untitled 4.html", "r").read()
-        )  ## simple test, move to test
+        )  # simple test, move to test
     else:
         for filename in sys.argv:
             if filename.endswith(".zip"):

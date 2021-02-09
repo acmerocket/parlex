@@ -1,6 +1,6 @@
 import dateparser
-import datetime
 import re
+
 
 # borrowed from https://github.com/jlev/parler-etl/blob/master/transform-post-html-to-jsonl.py
 def parse_datetime(timestr, origin_time):

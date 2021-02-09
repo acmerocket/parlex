@@ -8,7 +8,6 @@
 # by philion@acmerocket.com
 
 import sys
-import logging
 import boto3
 
 

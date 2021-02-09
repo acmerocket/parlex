@@ -52,6 +52,7 @@ ATTR_MAP = {
     "upvotes": ".pa--item--wrapper img[alt='Post Upvotes'] + .pa--item--count",
 }
 
+
 # scrape all interesting data from the message. doesn't transform or interpret anything
 def scrape_message(data):
     attrs = {}

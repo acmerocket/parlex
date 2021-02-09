@@ -6,15 +6,12 @@
 # by philion@acmerocket.com
 
 import sys
-import logging
 import zipfile
 import tarfile
-import datetime
-from pathlib import Path
 
 
 def sample_zip_archive(archive_name, count):
-    sizes = []
+    # sizes = []
     print("loading data")
     with zipfile.ZipFile(archive_name) as zf:
         i = 0

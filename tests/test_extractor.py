@@ -1,4 +1,3 @@
-
 import unittest
 
 from pathlib import Path
@@ -12,6 +11,7 @@ from parlex.extractor import extract_file
 # logging.basicConfig(level=logging.INFO, format = LOG_FORMAT)
 
 RESOURCES = "tests/resources/"
+
 
 class TestExtractor(unittest.TestCase):
     def test_weblink(self):
