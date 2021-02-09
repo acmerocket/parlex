@@ -1,7 +1,7 @@
 .PHONY:	setup test lint ci
 
 test: setup
-	pytest -cov=parlex tests/
+	pytest --cov=parlex tests/
 
 setup:
 	pip install --quiet -r requirements.txt

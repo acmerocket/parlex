@@ -6,19 +6,11 @@ Also builds standard dataset for loading directly into SQL, document and graph d
 
 ## Running
 
-    ./extractor.py some-big-archive.tgz
-    
+    ./parlex/extractor.py some-big-archive.tgz
+
 ## Test & Build
 
     make test
-    
-or
-
-    pipenv run python -m unittest discover
-    
-If you're not running pipenv, try:
-
-    pip install pipenv
 
 ### Current Status: work-in-progress
 
