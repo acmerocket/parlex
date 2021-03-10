@@ -29,9 +29,13 @@ Enough in place that I'm starting to identify gaps in the data and missing field
 ## Design
 
 The system will (eventually) consist of:
-* extractor: Parse an archive into a well-defined structure.
-* loader: Load extracted data into a data system: Export as CSV, SQL, JSON.
-* launcher: Launch a cloud/container instance with DB, load scripts and prepared queries.
+* datamine: Parse an archive into a well-defined structure (xapian db)
+* query: Query DB for:
+  * simple text
+  * with data filter
+  * with sentiment (how?)
+* export: Dump extracted data into a well-defined format: CSV, JSON, SQL (future)
+* launcher: Launch a cloud/container instance with DB, load scripts and prepared queries and data-browser.
 
  
 ## Working notes
@@ -129,6 +133,10 @@ First pass, pull...
 * userid
 * username
 * text
+
+Noting: '@REBELRUFIO' 
+
+Use as a tag to search texts. - update to dump separate messages, dump to csv.
 
 ### Post Structure
 
